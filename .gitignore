@@ -1,0 +1,7 @@
+*.pas
+/project/bin
+/project/obj
+/project/*.depend
+/project/*.layout
+/supporting/pythons/.idea
+/supporting/worker
