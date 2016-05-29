@@ -158,10 +158,10 @@ public:
                     switch (ch = nextChar())
                     {
                     case '*':
-                        dealScan(T_POW, "**");
+                        dealScan(T_OTHERS, "**");
                         break;
                     case '=':
-                        dealScan(T_MULE, "*=");
+                        dealScan(T_OTHERS, "*=");
                         break;
                     default:
                         backForward(ch);
@@ -171,7 +171,7 @@ public:
                     break;
                 case '+':
                     if ((ch = nextChar()) == '=')
-                        dealScan(T_ADDE, "+=");
+                        dealScan(T_OTHERS, "+=");
                     else
                     {
                         backForward(ch);
@@ -180,7 +180,7 @@ public:
                     break;
                 case '-':
                     if ((ch = nextChar()) == '=')
-                        dealScan(T_SUBE, "-=");
+                        dealScan(T_OTHERS, "-=");
                     else
                     {
                         backForward(ch);
@@ -199,7 +199,7 @@ public:
                     else
                     {
                         backForward(ch);
-                        dealScan(T_PERIOD, ".");
+                        dealScan(T_OTHERS, ".");
                     }
                     break;
                 case ',':
@@ -261,7 +261,7 @@ public:
                     thisWord[loc++] = quote;
                     thisWord[loc] = '\0';
 
-                    dealScan(T_STR, thisWord);
+                    dealScan(T_OTHERS, thisWord);
                     break;
                 case '{':
                     while (ch != '}' && ch != EOF)
