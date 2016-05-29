@@ -24,6 +24,8 @@ table_fp = open(r"lalrtable.htm", "r")
 column_map = []
 
 row_head = ""
+
+write_fp = open(r"table.txt", "w")
 for line in table_fp:
     line = line.strip()
     # print(str(row) + ' ' + str(col))
@@ -49,7 +51,8 @@ for line in table_fp:
                     print_str += "-" + str(grammars[line])
                 else:
                     print_str += str(line)
-            print(print_str)
+            # print(print_str)
+            write_fp.write(print_str + "\n")
     col += 1
     if col == COLUMNS:
         row, col = row + 1, 0
