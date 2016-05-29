@@ -2,6 +2,7 @@
 #include <cstring>
 #include <iostream>
 #include "wordscanner.cpp"
+#include "parser.cpp"
 using namespace std;
 
 //Love lemon_TsyD
@@ -14,6 +15,9 @@ int main()
     scanner.init();
     scanner.scan();
     scanner.close();
+
+    Parser parser(scanner.result, scanner.signTable);
+    parser.init();
 
     return 0;
 }

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <vector>
 #include "constants.h"
 using namespace std;
 
@@ -14,6 +15,8 @@ using namespace std;
 class Scanner
 {
 private:
+    typedef pair < int, string > IS;
+
     FILE *fp_r, *fp_w;
     int bufferTop;
     char buffer[BUFFER_SIZE];
@@ -21,28 +24,6 @@ private:
     char thisWord[BUFFER_SIZE];
 
     map < string, TokenType > table;
-    map < string, int > signTable; int signs;
-public:
-    Scanner() { }
-    void init()
-    {
-        fp_r = fopen("source.pas", "r");
-        fp_w = fopen("words.txt", "w");
-
-        bufferTop = 0;
-
-        for (int i = 0; i < KEYWORD_NUM; i++)
-        {
-            string str = string(keywordList[i]);
-            table[str] = (TokenType)i;
-        }
-    }
-
-    void close()
-    {
-        fclose(fp_r);
-        fclose(fp_w);
-    }
 
     char nextChar()
     {
@@ -61,6 +42,7 @@ public:
     void dealScan(TokenType tokenType, const char *word)
     {
         fprintf(fp_w, "(%d, %s)\n", (int)tokenType, word);
+        result.push_back(IS((int)tokenType, string(word)));
     }
 
     bool isSpace(char now)
@@ -76,6 +58,32 @@ public:
     bool isDigit(char now)
     {
         return now >= '0' && now <= '9';
+    }
+public:
+    map < string, int > signTable; int signs;
+    vector < IS > result;
+
+    Scanner() { }
+    void init()
+    {
+        result.clear();
+
+        fp_r = fopen("source.pas", "r");
+        fp_w = fopen("words.txt", "w");
+
+        bufferTop = 0;
+
+        for (int i = 0; i < KEYWORD_NUM; i++)
+        {
+            string str = string(keywordList[i]);
+            table[str] = (TokenType)i;
+        }
+    }
+
+    void close()
+    {
+        fclose(fp_r);
+        fclose(fp_w);
     }
 
     void scan()
