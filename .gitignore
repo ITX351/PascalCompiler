@@ -1,4 +1,4 @@
-*.pas
+/pas
 /project/bin
 /project/obj
 /project/*.depend
