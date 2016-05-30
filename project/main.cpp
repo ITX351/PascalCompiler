@@ -18,6 +18,11 @@ int main()
 
     Parser parser(scanner.result, scanner.signTable);
     parser.init();
+    int ret = parser.work();
+    if (ret < 0)
+        printf("SUCCESSFULLY ACCEPTED.\n");
+    else
+        printf("ERROR ON LINE %d, %s.\n", ret, scanner.result[ret].second.c_str());
 
     return 0;
 }

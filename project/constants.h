@@ -14,13 +14,13 @@ typedef enum
     T_EQL, T_GT, T_GTE, T_IDN, T_INT,
     T_LBRKPAR, T_LPAR, T_LT, T_LTE, T_MUL,
     T_NEQ, T_RBRKPAR, T_REAL, T_RPAR, T_SEMICL,
-    T_SLASH, T_SUB, T_OTHERS // 39
+    T_SLASH, T_SUB, T_EOF, T_OTHERS // 40
 } TokenType;
 
 static const char* keywordList[] = {
 	"array", "begin", "do", "else", "end",
 	"function", "if", "integer", "not", "of",
-	"prodedure", "program", "real", "then", "var",
+	"procedure", "program", "real", "then", "var",
 	"while"
 };
 

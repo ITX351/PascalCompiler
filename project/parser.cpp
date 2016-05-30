@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <stack>
 using namespace std;
 
 //Love lemon_TsyD
@@ -16,6 +17,8 @@ class Parser
 {
 private:
     typedef pair < int, string > IS;
+    typedef pair < int, int > II;
+
     map < string, int > signTable;
     vector < IS > words;
 
@@ -27,6 +30,8 @@ private:
     };
     vector < Reduce > reduceTable;
     map < string, int > terminalTable;
+    map < II, int > parseTable;
+
 public:
     Parser(vector < IS > _words, map < string, int > _signTable)
     {
@@ -40,6 +45,7 @@ public:
     {
         terminalTable.clear();
         reduceTable.clear();
+        parseTable.clear();
 
         int num = 0; FILE *fp;
 
@@ -82,10 +88,79 @@ public:
 //                printf(" %d", *it2);
 //            printf("\n");
 //        }
+
+        fp = fopen("..\\table.txt", "r");
+        int a, b, c;
+        while (fscanf(fp, "%d%d%d", &a, &b, &c) > 0)
+            parseTable[II(a, b)] = c;
+        fclose(fp);
     }
 
-    void work()
+    stack < int > s1, s2;
+    int work()
     {
+        while (!s1.empty())
+            s1.pop();
+        while (!s2.empty())
+            s2.pop();
+        s1.push(0);
 
+        int i = 0;
+        while (i < (int)words.size())
+        {
+            int a = s1.top(), b = words[i].first;
+            if (a == 1 && b == 38) // 1, 38 ACC
+            {
+                printf("ACCEPT!\n");
+                return -1;
+            }
+
+            if (parseTable.find(II(a, b)) == parseTable.end())
+            {
+                printf("ERROR PARSE(ACTION) %d, %d\n", a, b);
+                return i;
+            }
+
+            int c = parseTable[II(a, b)];
+            if (c > 0) // shift
+            {
+                s1.push(c);
+                s2.push(b);
+                i++;
+
+                printf("Status move in %d, Alphas move in %d.\n", a, b);
+            }
+            else // reduce
+            {
+                c = -c;
+                if (c < 0 || c >= (int)reduceTable.size())
+                {
+                    printf("ERROR IN FOUND REDUCE %d.\n", c);
+                    return i;
+                }
+                printf("REDUCED By %d.\n", c);
+
+                Reduce reduce = reduceTable[c];
+                printf("POP");
+                for (int j = 0; j < (int)reduce.signs.size(); j++)
+                {
+                    printf(" (%d, %d)", s1.top(), s2.top());
+                    s1.pop(); s2.pop();
+                }
+
+                int non_terminal = reduce.aim;
+                s2.push(non_terminal);
+
+                if (parseTable.find(II(s1.top(), non_terminal)) == parseTable.end())
+                {
+                    printf("\nERROR PARSE(GOTO) (%d, %d)", s1.top(), non_terminal);
+                    return i;
+                }
+                int Goto = parseTable[II(s1.top(), non_terminal)];
+                printf(" and PUSH %d, GOTO %d.\n", non_terminal, Goto);
+                s1.push(Goto);
+            }
+        }
+        return 0;
     }
 };

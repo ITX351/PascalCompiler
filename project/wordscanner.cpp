@@ -279,8 +279,10 @@ public:
                     printf("%c\n", ch);
                     break;
                 }
-            }
-        }
+            } // if - else
+        } // while
+
+        dealScan(T_EOF, "#");
 
         fprintf(fp_w, "\n");
         for (map<string, int >::iterator it = signTable.begin(); it != signTable.end(); it++)
