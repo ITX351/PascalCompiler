@@ -68,6 +68,7 @@ private:
         Command cmd;
         cmd.type = _type; cmd.arg1 = _arg1; cmd.arg2 = _arg2;
         cmd.op = _op; cmd.result = _result;
+        commands.push_back(cmd);
         nextquad++;
     }
 
