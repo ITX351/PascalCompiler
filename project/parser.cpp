@@ -7,6 +7,7 @@
 #include <vector>
 #include <sstream>
 #include <stack>
+#include "signtable.cpp"
 using namespace std;
 
 //Love lemon_TsyD
@@ -16,10 +17,16 @@ using namespace std;
 class Parser
 {
 private:
+    typedef enum
+    {
+        C_X_ASS_Y_OP_Z = 0, C_X_ASS_OP_Y, C_X_ASS_Y, C_GOTO_X,
+        C_IF_X_GOTO, C_IF_X_RELOP_Y_GOTO, C_PARAM_X, C_CALL_P_N
+    } CommandType;
+
     typedef pair < int, string > IS;
     typedef pair < int, int > II;
 
-    map < string, int > signTable;
+//    map < string, int > signTable;
     vector < IS > words;
 
     struct Reduce
@@ -32,20 +39,51 @@ private:
     map < string, int > terminalTable;
     map < II, int > parseTable;
 
-public:
-    Parser(vector < IS > _words, map < string, int > _signTable)
+    char str[51], str2[131];
+
+    struct Node
     {
-        signTable = _signTable;
+        int lineNumber;
+        int status;
+        string signName;
+        vector < int > truelist, falselist, nextlist;
+
+        Node(int _status) { status = _status; }
+    };
+    stack < int > s1;
+    stack < Node > s2;
+    signtable signTable;
+
+    struct Command
+    {
+        CommandType type;
+        string arg1, arg2, op, result;
+    };
+    vector < Command > commands;
+
+    int nextquad;
+    void gencode(CommandType _type, const string& _result, const string& _arg1,
+                 const string& _op, const string& _arg2)
+    {
+        Command cmd;
+        cmd.type = _type; cmd.arg1 = _arg1; cmd.arg2 = _arg2;
+        cmd.op = _op; cmd.result = _result;
+        nextquad++;
+    }
+
+public:
+    Parser(vector < IS > _words)
+    {
         words = _words;
     }
 
-    char str[51], str2[131];
-
     void init()
     {
-        terminalTable.clear();
         reduceTable.clear();
+        terminalTable.clear();
         parseTable.clear();
+        commands.clear();
+        nextquad = 0;
 
         int num = 0; FILE *fp;
 
@@ -96,9 +134,10 @@ public:
         fclose(fp);
     }
 
-    stack < int > s1, s2;
     int work()
     {
+        FILE *fp_parser = fopen("parser_result.txt", "w");
+
         while (!s1.empty())
             s1.pop();
         while (!s2.empty())
@@ -111,13 +150,13 @@ public:
             int a = s1.top(), b = words[i].first;
             if (a == 1 && b == 38) // 1, 38 ACC
             {
-                printf("ACCEPT!\n");
+                fprintf(fp_parser, "ACCEPT!\n");
                 return -1;
             }
 
             if (parseTable.find(II(a, b)) == parseTable.end())
             {
-                printf("ERROR PARSE(ACTION) %d, %d\n", a, b);
+                fprintf(fp_parser, "ERROR PARSE(ACTION) %d, %d\n", a, b);
                 return i;
             }
 
@@ -125,26 +164,26 @@ public:
             if (c > 0) // shift
             {
                 s1.push(c);
-                s2.push(b);
+                s2.push(Node(b));
                 i++;
 
-                printf("Status move in %d, Alphas move in %d.\n", a, b);
+                fprintf(fp_parser, "Status move in %d, Alphas move in %d.\n", a, b);
             }
             else // reduce
             {
                 c = -c;
                 if (c < 0 || c >= (int)reduceTable.size())
                 {
-                    printf("ERROR IN FOUND REDUCE %d.\n", c);
+                    fprintf(fp_parser, "ERROR IN FOUND REDUCE %d.\n", c);
                     return i;
                 }
-                printf("REDUCED By %d.\n", c);
+                fprintf(fp_parser, "REDUCED By %d.\n", c);
 
                 Reduce reduce = reduceTable[c];
-                printf("POP");
+                fprintf(fp_parser, "POP");
                 for (int j = 0; j < (int)reduce.signs.size(); j++)
                 {
-                    printf(" (%d, %d)", s1.top(), s2.top());
+                    fprintf(fp_parser, " (%d, %d)", s1.top(), s2.top().status);
                     s1.pop(); s2.pop();
                 }
 
@@ -153,11 +192,11 @@ public:
 
                 if (parseTable.find(II(s1.top(), non_terminal)) == parseTable.end())
                 {
-                    printf("\nERROR PARSE(GOTO) (%d, %d)", s1.top(), non_terminal);
+                    fprintf(fp_parser, "\nERROR PARSE(GOTO) (%d, %d)", s1.top(), non_terminal);
                     return i;
                 }
                 int Goto = parseTable[II(s1.top(), non_terminal)];
-                printf(" and PUSH %d, GOTO %d.\n", non_terminal, Goto);
+                fprintf(fp_parser, " and PUSH %d, GOTO %d.\n", non_terminal, Goto);
                 s1.push(Goto);
             }
         }

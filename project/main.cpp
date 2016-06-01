@@ -16,7 +16,7 @@ int main()
     scanner.scan();
     scanner.close();
 
-    Parser parser(scanner.result, scanner.signTable);
+    Parser parser(scanner.result);
     parser.init();
     int ret = parser.work();
     if (ret < 0)
